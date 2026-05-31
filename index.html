@@ -335,7 +335,7 @@ async function send(){
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': key,
-        'anthropic-dangerous-direct-browser-calls': 'true'
+        'x-provider': 'groq',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
