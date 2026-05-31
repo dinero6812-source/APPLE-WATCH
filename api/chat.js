@@ -7,52 +7,41 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const apiKey = req.headers['x-api-key'];
-  const provider = req.headers['x-provider'] || 'groq';
-
   if (!apiKey) return res.status(400).json({ error: { message: 'Missing API key' } });
 
   try {
-    let url, headers, body;
+    const messages = req.body.messages || [];
+    const system = req.body.system;
+    const openaiMessages = [];
+    if (system) openaiMessages.push({ role: 'system', content: system });
+    openaiMessages.push(...messages);
 
-    if (provider === 'groq') {
-      url = 'https://api.groq.com/openai/v1/chat/completions';
-      headers = {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
-      };
-      // Convert Anthropic-style messages to OpenAI format
-      const messages = req.body.messages || [];
-      const system = req.body.system;
-      const openaiMessages = [];
-      if (system) openaiMessages.push({ role: 'system', content: system });
-      openaiMessages.push(...messages);
-      body = JSON.stringify({
+      },
+      body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 500,
         messages: openaiMessages
-      });
-    } else {
-      // Anthropic
-      url = 'https://api.anthropic.com/v1/messages';
-      headers = {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      };
-      body = JSON.stringify(req.body);
-    }
+      })
+    });
 
-    const response = await fetch(url, { method: 'POST', headers, body });
     const data = await response.json();
+    console.log('GROQ STATUS:', response.status);
+    console.log('GROQ DATA:', JSON.stringify(data));
 
-    // Normalize Groq response to Anthropic format
-    if (provider === 'groq') {
-      const text = data.choices?.[0]?.message?.content || 'Sin respuesta.';
-      return res.status(200).json({ content: [{ type: 'text', text }] });
+    if (!response.ok) {
+      return res.status(200).json({ content: [{ type: 'text', text: 'Error Groq: ' + (data.error?.message || JSON.stringify(data)) }] });
     }
 
-    res.status(response.status).json(data);
+    const text = data.choices?.[0]?.message?.content || 'Sin respuesta.';
+    return res.status(200).json({ content: [{ type: 'text', text }] });
+
   } catch (e) {
-    res.status(500).json({ error: { message: e.message } });
+    console.log('EXCEPTION:', e.message);
+    return res.status(200).json({ content: [{ type: 'text', text: 'Error: ' + e.message }] });
   }
 }
