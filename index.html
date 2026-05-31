@@ -338,10 +338,7 @@ async function send(){
         'x-provider': 'groq',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'Eres un asistente IA en un Apple Watch. Responde SIEMPRE en español. Respuestas muy cortas: máximo 3 frases. Sin markdown, sin asteriscos, sin listas. Solo texto limpio. Si preguntan por clima, noticias o info actual, usa la herramienta de búsqueda web.',
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: 'Eres un asistente IA en un Apple Watch. Responde SIEMPRE en español. Respuestas muy cortas: máximo 3 frases. Sin markdown, sin asteriscos, sin listas. Solo texto limpio.',
         messages: history
       })
     });
