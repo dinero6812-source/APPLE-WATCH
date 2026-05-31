@@ -7,41 +7,48 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const apiKey = req.headers['x-api-key'];
-  if (!apiKey) return res.status(400).json({ error: { message: 'Missing API key' } });
+  if (!apiKey) return res.status(200).json({ content: [{ type: 'text', text: 'Error: falta API key' }] });
+
+  // Parse body manually in case Vercel doesn't do it
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch(e) { body = {}; }
+  }
+  if (!body) body = {};
 
   try {
-    const messages = req.body.messages || [];
-    const system = req.body.system;
+    const messages = body.messages || [];
+    const system = body.system || '';
     const openaiMessages = [];
     if (system) openaiMessages.push({ role: 'system', content: system });
-    openaiMessages.push(...messages);
+    for (const m of messages) {
+      openaiMessages.push({ role: m.role, content: m.content });
+    }
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 500,
+        max_tokens: 300,
         messages: openaiMessages
       })
     });
 
-    const data = await response.json();
-    console.log('GROQ STATUS:', response.status);
-    console.log('GROQ DATA:', JSON.stringify(data));
+    const data = await groqRes.json();
 
-    if (!response.ok) {
-      return res.status(200).json({ content: [{ type: 'text', text: 'Error Groq: ' + (data.error?.message || JSON.stringify(data)) }] });
+    if (!groqRes.ok) {
+      const errMsg = data?.error?.message || JSON.stringify(data);
+      return res.status(200).json({ content: [{ type: 'text', text: 'Error Groq: ' + errMsg }] });
     }
 
-    const text = data.choices?.[0]?.message?.content || 'Sin respuesta.';
+    const text = data?.choices?.[0]?.message?.content || 'Sin respuesta.';
     return res.status(200).json({ content: [{ type: 'text', text }] });
 
   } catch (e) {
-    console.log('EXCEPTION:', e.message);
     return res.status(200).json({ content: [{ type: 'text', text: 'Error: ' + e.message }] });
   }
 }
