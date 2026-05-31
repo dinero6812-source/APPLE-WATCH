@@ -6,7 +6,6 @@
 <title>Watch AI</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
   html, body {
     height: 100%;
     background: #000;
@@ -15,7 +14,6 @@
     justify-content: center;
     font-family: -apple-system, 'SF Pro Rounded', 'Helvetica Neue', sans-serif;
   }
-
   .watch-frame {
     width: 184px;
     height: 224px;
@@ -27,7 +25,6 @@
     overflow: hidden;
     position: relative;
   }
-
   .topbar {
     display: flex;
     justify-content: space-between;
@@ -40,7 +37,6 @@
   .dot { width: 6px; height: 6px; border-radius: 50%; background: #30d158; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .netlabel { font-size: 9px; color: #30d158; }
-
   .chat-area {
     flex: 1;
     overflow-y: auto;
@@ -51,7 +47,6 @@
     scroll-behavior: smooth;
   }
   .chat-area::-webkit-scrollbar { display: none; }
-
   .bubble {
     max-width: 92%;
     padding: 6px 9px;
@@ -73,14 +68,11 @@
     border-bottom-left-radius: 3px;
     border: 0.5px solid #2c2c2e;
   }
-  .bubble.loading {
-    display: flex; gap: 4px; align-items: center; padding: 8px 10px;
-  }
+  .bubble.loading { display: flex; gap: 4px; align-items: center; padding: 8px 10px; }
   .ld { width: 4px; height: 4px; border-radius: 50%; background: #666; animation: blink 1.2s infinite; }
   .ld:nth-child(2){ animation-delay:.2s }
   .ld:nth-child(3){ animation-delay:.4s }
   @keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
-
   .empty {
     flex: 1;
     display: flex;
@@ -94,7 +86,6 @@
     padding-bottom: 10px;
   }
   .empty-icon { font-size: 24px; }
-
   .quick-row {
     display: flex;
     gap: 4px;
@@ -117,7 +108,6 @@
     -webkit-appearance: none;
   }
   .qbtn:active { background: #2c2c2e; color: #fff; }
-
   .input-row {
     display: flex;
     align-items: center;
@@ -140,7 +130,6 @@
   }
   .inp::placeholder { color: #555; }
   .inp:focus { border-color: #0a84ff; }
-
   .sbtn {
     width: 28px; height: 28px;
     border-radius: 50%;
@@ -154,70 +143,10 @@
   }
   .sbtn:active { transform: scale(.88); opacity: .8; }
   .sbtn svg { width: 13px; height: 13px; fill: white; }
-
-  /* SETUP SCREEN */
-  .setup-screen {
-    position: absolute; inset: 0;
-    background: #0a0a0a;
-    border-radius: 42px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 12px;
-    z-index: 10;
-    gap: 8px;
-  }
-  .setup-screen h2 { font-size: 12px; font-weight: 600; color: #f0f0f0; text-align: center; }
-  .setup-screen p { font-size: 9.5px; color: #888; text-align: center; line-height: 1.4; }
-  .setup-screen input {
-    width: 100%;
-    background: #1c1c1e;
-    border: 0.5px solid #3a3a3c;
-    border-radius: 12px;
-    padding: 7px 10px;
-    font-size: 9.5px;
-    color: #f0f0f0;
-    outline: none;
-    font-family: inherit;
-    -webkit-appearance: none;
-    text-align: center;
-  }
-  .setup-screen input:focus { border-color: #0a84ff; }
-  .setup-ok {
-    width: 100%;
-    background: #0a84ff;
-    border: none;
-    border-radius: 12px;
-    padding: 7px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #fff;
-    cursor: pointer;
-    font-family: inherit;
-    -webkit-appearance: none;
-  }
-  .setup-ok:active { opacity: .8; }
-  .key-icon { font-size: 20px; }
-  .err-msg { font-size: 9px; color: #ff453a; text-align: center; min-height: 12px; }
 </style>
 </head>
 <body>
-
 <div class="watch-frame" id="app">
-
-  <!-- SETUP SCREEN -->
-  <div class="setup-screen" id="setupScreen">
-    <div class="key-icon">🔑</div>
-    <h2>API Key</h2>
-    <p>Pega tu API key<br>(Groq, Gemini, DeepSeek...)</p>
-    <input type="password" id="apiKeyInput" placeholder="Pega tu API key aquí" autocomplete="off" spellcheck="false" />
-    <div class="err-msg" id="setupErr"></div>
-    <button class="setup-ok" onclick="saveKey()">Activar IA</button>
-    <p style="font-size:8.5px;color:#555;margin-top:2px">Se guarda solo en este dispositivo</p>
-  </div>
-
-  <!-- MAIN CHAT -->
   <div class="topbar">
     <span class="time" id="clock">--:--</span>
     <div class="status">
@@ -225,37 +154,30 @@
       <span class="netlabel">IA</span>
     </div>
   </div>
-
   <div class="chat-area" id="chatArea">
     <div class="empty" id="emptyHint">
       <div class="empty-icon">✦</div>
       <span>IA con internet<br>lista para ayudarte</span>
     </div>
   </div>
-
   <div class="quick-row">
     <button class="qbtn" onclick="q('¿Tiempo en Madrid hoy?')">🌤 Clima</button>
     <button class="qbtn" onclick="q('Noticias más importantes ahora')">📰 Noticias</button>
     <button class="qbtn" onclick="q('Dime algo interesante')">✨ Dato</button>
     <button class="qbtn" onclick="q('Chiste corto')">😄 Chiste</button>
     <button class="qbtn" onclick="clearChat()">🗑 Borrar</button>
-    <button class="qbtn" onclick="resetKey()">🔑 API</button>
   </div>
-
   <div class="input-row">
     <input class="inp" id="userInput" type="text" placeholder="Pregunta…" maxlength="140" />
     <button class="sbtn" onclick="send()" aria-label="Enviar">
       <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2z"/></svg>
     </button>
   </div>
-
 </div>
-
 <script>
 let busy = false;
 let history = [];
 
-// Clock
 function tick(){
   const n = new Date();
   document.getElementById('clock').textContent =
@@ -263,26 +185,6 @@ function tick(){
 }
 tick(); setInterval(tick, 15000);
 
-// Key management
-function getKey(){ return localStorage.getItem('watchai_key') || ''; }
-function saveKey(){
-  const v = document.getElementById('apiKeyInput').value.trim();
-  if(v.length < 10){
-    document.getElementById('setupErr').textContent = 'Clave inválida';
-    return;
-  }
-  localStorage.setItem('watchai_key', v);
-  document.getElementById('setupScreen').style.display = 'none';
-}
-
-// Init: hide setup if key exists
-if(getKey()){
-  document.getElementById('setupScreen').style.display = 'none';
-} else {
-  document.getElementById('setupScreen').style.display = 'flex';
-}
-
-// Chat helpers
 function bubble(text, role, load=false){
   const hint = document.getElementById('emptyHint');
   if(hint) hint.remove();
@@ -299,15 +201,6 @@ function bubble(text, role, load=false){
   return d;
 }
 
-function resetKey(){
-  const screen = document.getElementById('setupScreen');
-  const inp = document.getElementById('apiKeyInput');
-  inp.value = getKey(); // pre-fill with current key so user can edit it
-  document.getElementById('setupErr').textContent = '';
-  screen.style.display = 'flex';
-  setTimeout(() => inp.focus(), 100);
-}
-
 function clearChat(){
   history = [];
   document.getElementById('chatArea').innerHTML =
@@ -319,40 +212,21 @@ async function send(){
   const inp = document.getElementById('userInput');
   const msg = inp.value.trim();
   if(!msg) return;
-  const key = getKey();
-  if(!key){ document.getElementById('setupScreen').style.display='flex'; return; }
   inp.value = '';
   busy = true;
 
   bubble(msg, 'user');
   history.push({ role:'user', content: msg });
-
   const lb = bubble('', 'ai', true);
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'x-provider': 'groq',
-      },
-      body: JSON.stringify({
-        system: 'Eres un asistente IA en un Apple Watch. Responde SIEMPRE en español. Respuestas muy cortas: máximo 3 frases. Sin markdown, sin asteriscos, sin listas. Solo texto limpio.',
-        messages: history
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history })
     });
 
     const data = await res.json();
-
-    if(data.error){
-      lb.classList.remove('loading');
-      lb.textContent = 'Error: ' + (data.error.message || 'API error');
-      history.pop();
-      busy = false;
-      return;
-    }
-
     let reply = '';
     if(data.content){
       for(const b of data.content){
@@ -361,7 +235,7 @@ async function send(){
     }
     reply = reply.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,6} /g,'').trim();
     if(!reply) reply = 'Sin respuesta.';
-    if(reply.length > 260) reply = reply.substring(0,257)+'…';
+    if(reply.length > 300) reply = reply.substring(0,297)+'…';
 
     lb.classList.remove('loading');
     lb.textContent = reply;
@@ -370,7 +244,7 @@ async function send(){
 
   } catch(e){
     lb.classList.remove('loading');
-    lb.textContent = 'Sin conexión. Verifica internet.';
+    lb.textContent = 'Error de conexión.';
     history.pop();
   }
 
