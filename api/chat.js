@@ -16,8 +16,35 @@ export default async function handler(req, res) {
   try {
     const messages = body.messages || [];
     const system = body.system || '';
+    const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || '';
+
+    // Detect if query needs real-time info
+    const needsSearch = /clima|tiempo|noticias|hoy|ahora|actual|precio|bolsa|partido|resultado|estreno|evento/i.test(lastUserMsg);
+
+    let searchContext = '';
+    if (needsSearch) {
+      try {
+        const query = encodeURIComponent(lastUserMsg);
+        const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${query}&format=json&no_html=1&skip_disambig=1`, {
+          headers: { 'User-Agent': 'WatchAI/1.0' }
+        });
+        const ddgData = await ddgRes.json();
+        const abstract = ddgData.AbstractText || '';
+        const relatedTopics = (ddgData.RelatedTopics || [])
+          .slice(0, 3)
+          .map(t => t.Text || '')
+          .filter(Boolean)
+          .join(' | ');
+        if (abstract || relatedTopics) {
+          searchContext = `\n\nINFO ACTUAL DE INTERNET: ${abstract} ${relatedTopics}`.trim();
+        }
+      } catch(e) {
+        // search failed silently, continue without context
+      }
+    }
+
     const openaiMessages = [];
-    if (system) openaiMessages.push({ role: 'system', content: system });
+    openaiMessages.push({ role: 'system', content: system + searchContext });
     for (const m of messages) openaiMessages.push({ role: m.role, content: m.content });
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
