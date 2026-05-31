@@ -9,11 +9,8 @@ export default async function handler(req, res) {
   const apiKey = req.headers['x-api-key'];
   if (!apiKey) return res.status(200).json({ content: [{ type: 'text', text: 'Error: falta API key' }] });
 
-  // Parse body manually in case Vercel doesn't do it
   let body = req.body;
-  if (typeof body === 'string') {
-    try { body = JSON.parse(body); } catch(e) { body = {}; }
-  }
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) { body = {}; } }
   if (!body) body = {};
 
   try {
@@ -21,9 +18,7 @@ export default async function handler(req, res) {
     const system = body.system || '';
     const openaiMessages = [];
     if (system) openaiMessages.push({ role: 'system', content: system });
-    for (const m of messages) {
-      openaiMessages.push({ role: m.role, content: m.content });
-    }
+    for (const m of messages) openaiMessages.push({ role: m.role, content: m.content });
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -42,7 +37,7 @@ export default async function handler(req, res) {
 
     if (!groqRes.ok) {
       const errMsg = data?.error?.message || JSON.stringify(data);
-      return res.status(200).json({ content: [{ type: 'text', text: 'Error Groq: ' + errMsg }] });
+      return res.status(200).json({ content: [{ type: 'text', text: 'Error: ' + errMsg }] });
     }
 
     const text = data?.choices?.[0]?.message?.content || 'Sin respuesta.';
