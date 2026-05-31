@@ -276,7 +276,11 @@ function saveKey(){
 }
 
 // Init: hide setup if key exists
-if(getKey()) document.getElementById('setupScreen').style.display = 'none';
+if(getKey()){
+  document.getElementById('setupScreen').style.display = 'none';
+} else {
+  document.getElementById('setupScreen').style.display = 'flex';
+}
 
 // Chat helpers
 function bubble(text, role, load=false){
@@ -296,8 +300,12 @@ function bubble(text, role, load=false){
 }
 
 function resetKey(){
-  localStorage.removeItem('watchai_key');
-  document.getElementById('setupScreen').style.display='flex';
+  const screen = document.getElementById('setupScreen');
+  const inp = document.getElementById('apiKeyInput');
+  inp.value = getKey(); // pre-fill with current key so user can edit it
+  document.getElementById('setupErr').textContent = '';
+  screen.style.display = 'flex';
+  setTimeout(() => inp.focus(), 100);
 }
 
 function clearChat(){
